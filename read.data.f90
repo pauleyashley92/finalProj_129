@@ -10,8 +10,8 @@ program read_data
         close(2)
 
         do i = 1,rank,1
-                read(21,*) A(i,:)
-                write(21,*) A(i,:)
+                read(2,*) A(i,:)
+                write(2,*) A(i,:)
         enddo
         
 end program
