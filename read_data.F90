@@ -1,6 +1,6 @@
 program read_data
         implicit none
-        real, allocatable, dimension (:,:) :: A
+        real, dimension (3,3) :: A
         real, allocatable, dimension (:):: b
         integer :: i,j, rank
         !Open the dat file
@@ -8,6 +8,7 @@ program read_data
         !Read the file then store into an array A and remember rank
         read(2,*) A 
         call printMatrix(A, 3,3)
+        close(2)
 end program read_data
 
 subroutine printMatrix(array, n, m)
