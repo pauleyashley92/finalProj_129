@@ -31,6 +31,7 @@ implicit none
      print *, array(i,:)
   end do
   close(15)
+  
 end subroutine printMatrix1
 
 subroutine printMatrix2(n)
@@ -47,3 +48,6 @@ implicit none
    enddo
    close (16)
 end subroutine printMatrix2
+
+function gaussianElim(A,b)
+end function gaussianElim    
