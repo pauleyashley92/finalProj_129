@@ -43,7 +43,7 @@ implicit none
    read(16,*)
    read(16,*) array
    do i =1,n
-       print *, array(n)
+       print *, array(i)
    enddo
    close (16)
 end subroutine printMatrix2
