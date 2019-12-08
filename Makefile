@@ -1,6 +1,6 @@
 # /codes/multifile/Makefile5
 
-OBJECTS = gaussian_elim_FixMe.o
+OBJECTS = read_data.o
 .PHONY: clean
 
 output.txt: main.exe
