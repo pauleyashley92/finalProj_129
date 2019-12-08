@@ -94,20 +94,75 @@ contains
   subroutine gaussian_elimination(A,b,N)
     real, allocatable, dimension(:,:), intent(INOUT) :: A
     real, allocatable, dimension(:), intent(INOUT) :: b
+    real, allocatable, dimension(:) :: Col
     integer, intent (in) :: N
-    integer :: i,j
+    integer :: i,j, Max
     real :: factor
 
+    allocate ( Col(N) )
+
     ! gaussian elimination
-    do j = 1, N-1           ! j is column
-       do i = j+1, N       ! i is row
-          factor = A(i,j)/A(1,1)
-          A(i,:) = A(i,:) - factor*A(j,:)
-          b(i) = b(i) - factor*b(j)
-       end do
+    !do j = 1, N-1           ! j is column
+    !   do i = j+1, N       ! i is row
+    !     factor = A(i,j)/A(1,1)
+    !      A(i,:) = A(i,:) - factor*A(j,:)
+    !     b(i) = b(i) - factor*b(j)
+    !   end do
+    !end do
+
+    do j=1, (N-1)
+      Col = A(:,j)
+      call findMaxInColumn(Col,N,Max)
+      if (Max /= j) then
+          print *, " ", "Matrix A .."
+          call printMatrix(A, N)
+          print *, "Swap the rows so max is on top.."
+          print *, " "
+          
+          Col = A(j, :)
+          A(j, :) = A(Max, :)
+          A(Max, :) = Col
+
+          print *, " ", "Matrix A .."
+          call printMatrix(A, N)
+
+      end if
     end do
+
+    deallocate( Col )
+
 end subroutine gaussian_elimination
 
+!----------------------------------------!
+! Find Max Column 
+! looks through the column of A
+! return the index of the row with the 
+! largest absolute value
+!----------------------------------------!
+subroutine findMaxInColumn(Col,N,Max)
+  real, allocatable, dimension(:), intent(in) :: Col
+  integer, intent (in) :: N
+  integer, intent(out) :: Max
+  integer :: i
+
+  print *, "Column.. "
+  print *, Col
+  print *, " "
+  
+  Max = 1
+  do i=2, N
+    print *, "Looking at element: ", Col(i)
+    print *, " "
+    if( abs(Col(i)) > Max ) then
+      print *, "Element was larger than max."
+      print *, " "
+      Max = i
+    end if
+  end do
+  print *, "Max in column: ", Max
+  print *, " "
+
+end subroutine findMaxInColumn
 
 !----------------------------------------!
 ! Back Substitution
@@ -231,16 +286,16 @@ program read_data
   call printAugmented(A, b, rank1)
 
   !Do Gaussian Elimination
-  print *, "Gaussian elimination .."
+  print *, "Gaussian elimination with Partial Pivoting.."
   call gaussian_elimination(A,b, rank1)
   call printAugmented(A, b, rank1)
 
   !Do Back Substitution
-  print *, "Back Substitution .."
-  call backsubstitution(A,b,rank1)
+  !print *, "Back Substitution .."
+  !call backsubstitution(A,b,rank1)
 
-  call printAugmented(A,b,rank1)
-  print *, " "
+  !call printAugmented(A,b,rank1)
+  !print *, " "
 
   deallocate(A) 
   print *, "Gaussian elimination without Partial Pivoting .."
@@ -263,11 +318,11 @@ program read_data
   end do
 
   call printMatrix(A,rank1)
-  print*, 
+  print*, " "
 
   call decomposeL(A,rank1)
   call printMatrix(A,rank1) 
-  print*, 
+  print*, " "
   call decomposeU(A,rank1)
   call printMatrix(A,rank1)
   !deallocate memory for array and matrix
