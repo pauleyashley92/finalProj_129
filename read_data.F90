@@ -111,6 +111,35 @@ contains
 end subroutine gaussian_elimination
 
 
+!----------------------------------------!
+! Back Substitution
+! A is the matrix
+! b is vedtor to augment with
+! N is the rank
+!----------------------------------------!
+subroutine backsubstitution(A,b,N)
+  real, allocatable, dimension(:,:), intent(INOUT) :: A
+  real, allocatable, dimension(:), intent(INOUT) :: b
+  integer, intent (in) :: N
+  integer :: i,j
+  real :: factor
+
+  ! doing back substitution
+  do j = N, (N-1), -1            ! j is column
+     do i = j-1, 1, -1        ! i is column
+        factor = A(i,j)/A(j,j)
+        A(i,:) = A(i,:) - factor*A(j,:)
+        b(i) = b(i) - factor*b(j)
+     end do
+  end do
+
+  ! overwrite the solution vector to b
+  do i = 1, N
+     b(i) = b(i)/A(i,i)
+  end do
+end subroutine backsubstitution
+
+
 end module set_up
 
 
@@ -177,15 +206,17 @@ program read_data
   call printVector(b, rank2)
   print *, " ", "Augmented A with b.."
   call printAugmented(A, b, rank1)
-  print *, " "
 
   !Do Gaussian Elimination
-
-  print *, ""    ! print a blank line
-  print *, "Gaussian elimination........"
+  print *, "Gaussian elimination .."
   call gaussian_elimination(A,b, rank1)
-
   call printAugmented(A, b, rank1)
+
+  !Do Back Substitution
+  print *, "Back Substitution .."
+  call backsubstitution(A,b,rank1)
+
+  call printAugmented(A,b,rank1)
   print *, " "
 
 
