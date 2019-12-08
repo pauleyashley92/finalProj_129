@@ -101,8 +101,6 @@ contains
     ! gaussian elimination
     do j = 1, (N-1)           ! j is column
        do i = j+1, N       ! i is row
-    !do j = 1, N           ! j is column
-    !   do i = 1, N       ! i is row
           factor = A(i,j)/A(1,1)
           A(i,:) = A(i,:) - factor*A(j,:)
           b(i) = b(i) - factor*b(j)
