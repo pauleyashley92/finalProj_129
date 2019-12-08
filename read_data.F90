@@ -86,7 +86,7 @@ contains
   end subroutine printAugmented
 
   !----------------------------------------!
-  ! Gaussian Elimination
+  ! Gaussian Elimination with Pivoting
   ! A is the matrix
   ! b is vector to augment with
   ! N is the rank
@@ -101,37 +101,58 @@ contains
 
     allocate ( Col(N) )
 
-    ! gaussian elimination
-    !do j = 1, N-1           ! j is column
-    !   do i = j+1, N       ! i is row
-    !     factor = A(i,j)/A(1,1)
-    !      A(i,:) = A(i,:) - factor*A(j,:)
-    !     b(i) = b(i) - factor*b(j)
-    !   end do
-    !end do
-
     do j=1, (N-1)
       Col = A(:,j)
       call findMaxInColumn(Col,N,Max)
       if (Max /= j) then
-          print *, " ", "Matrix A .."
-          call printMatrix(A, N)
-          print *, "Swap the rows so max is on top.."
-          print *, " "
+          !interchange row K and j
+          !print *, " ", "Matrix A .."
+          !call printMatrix(A, N)
+          !print *, "Swap the rows so max is on top.."
+          !print *, " "
           
           Col = A(j, :)
           A(j, :) = A(Max, :)
           A(Max, :) = Col
 
-          print *, " ", "Matrix A .."
-          call printMatrix(A, N)
+          !print *, " ", "Matrix A .."
+          !call printMatrix(A, N)
 
       end if
+      do i = j+1, N
+         factor = A(i,j)/A(j,j)
+         A(i,:) = A(i,:) - factor*A(j,:)
+         b(i) = b(i) - factor*b(j)
+      end do
     end do
 
     deallocate( Col )
 
 end subroutine gaussian_elimination
+
+!----------------------------------------!
+  ! Standard Gaussian Elimination 
+  ! A is the matrix
+  ! b is vector to augment with
+  ! N is the rank
+  !----------------------------------------!
+  subroutine stdgaussian_elimination(A,b,N)
+    real, allocatable, dimension(:,:), intent(INOUT) :: A
+    real, allocatable, dimension(:), intent(INOUT) :: b
+    real, allocatable, dimension(:) :: Col
+    integer, intent (in) :: N
+    integer :: i,j, Max
+    real :: factor
+
+    do j=1, (N-1)
+      do i = j+1, N
+         factor = A(i,j)/A(j,j)
+         A(i,:) = A(i,:) - factor*A(j,:)
+         b(i) = b(i) - factor*b(j)
+      end do
+    end do
+
+end subroutine stdgaussian_elimination
 
 !----------------------------------------!
 ! Find Max Column 
@@ -145,22 +166,22 @@ subroutine findMaxInColumn(Col,N,Max)
   integer, intent(out) :: Max
   integer :: i
 
-  print *, "Column.. "
-  print *, Col
-  print *, " "
+  !print *, "Column.. "
+  !print *, Col
+  !print *, " "
   
   Max = 1
   do i=2, N
-    print *, "Looking at element: ", Col(i)
-    print *, " "
+    !print *, "Looking at element: ", Col(i)
+    !print *, " "
     if( abs(Col(i)) > Max ) then
-      print *, "Element was larger than max."
-      print *, " "
+      !print *, "Element was larger than max."
+      !print *, " "
       Max = i
     end if
   end do
-  print *, "Max in column: ", Max
-  print *, " "
+  !print *, "Max in column: ", Max
+  !print *, " "
 
 end subroutine findMaxInColumn
 
