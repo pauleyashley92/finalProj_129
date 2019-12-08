@@ -1,3 +1,6 @@
+! Final Project for AM129 , Fall 2019
+! Written by Ashley Pauley and Kevin Lo
+
 module set_up
 
 implicit none
@@ -8,7 +11,7 @@ contains
   ! N is the input
   ! NxN array is the return value
   !----------------------------------------!
-  subroutine initMatrix ( N, A )
+  subroutine initMatrix (N,A)
     integer, intent (in) :: N
     real, dimension (:,:), allocatable, intent (out) :: A
     integer :: i
@@ -37,7 +40,7 @@ contains
   ! M is the matrix
   ! N is the rank
   !----------------------------------------!
-  subroutine printMatrix(M, N)
+  subroutine printMatrix(M,N)
 
     integer, intent (in) :: N
     real, dimension (:,:), allocatable, intent (in) :: M
@@ -53,7 +56,7 @@ contains
   ! V is the vector
   ! N is the size
   !----------------------------------------!
-  subroutine printVector(V, N)
+  subroutine printVector(V,N)
 
     integer, intent (in) :: N
     real, dimension (:), allocatable, intent (in) :: V
@@ -70,7 +73,7 @@ contains
   ! b is vedtor to augment with
   ! N is the rank
   !----------------------------------------!
-  subroutine printAugmented(A, b, N)
+  subroutine printAugmented(A,b,N)
 
     real, dimension (:,:), allocatable, intent (in) :: A
     real, dimension (:), allocatable, intent (in) :: B
@@ -81,6 +84,31 @@ contains
     end do
 
   end subroutine printAugmented
+
+  !----------------------------------------!
+  ! Gaussian Elimination
+  ! A is the matrix
+  ! b is vedtor to augment with
+  ! N is the rank
+  !----------------------------------------!
+  subroutine gaussian_elimination(A,b,N)
+    real, allocatable, dimension(:,:), intent(INOUT) :: A
+    real, allocatable, dimension(:), intent(INOUT) :: b
+    integer, intent (in) :: N
+    integer :: i,j
+    real :: factor
+
+    ! gaussian elimination
+    do j = 1, (N-1)           ! j is column
+       do i = j+1, N       ! i is row
+    !do j = 1, N           ! j is column
+    !   do i = 1, N       ! i is row
+          factor = A(i,j)/A(1,1)
+          A(i,:) = A(i,:) - factor*A(j,:)
+          b(i) = b(i) - factor*b(j)
+       end do
+    end do
+end subroutine gaussian_elimination
 
 
 end module set_up
@@ -150,6 +178,16 @@ program read_data
   print *, " ", "Augmented A with b.."
   call printAugmented(A, b, rank1)
   print *, " "
+
+  !Do Gaussian Elimination
+
+  print *, ""    ! print a blank line
+  print *, "Gaussian elimination........"
+  call gaussian_elimination(A,b, rank1)
+
+  call printAugmented(A, b, rank1)
+  print *, " "
+
 
   !deallocate memory for array and matrix
   deallocate (row)
