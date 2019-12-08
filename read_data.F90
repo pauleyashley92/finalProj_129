@@ -88,7 +88,7 @@ contains
   !----------------------------------------!
   ! Gaussian Elimination
   ! A is the matrix
-  ! b is vedtor to augment with
+  ! b is vector to augment with
   ! N is the rank
   !----------------------------------------!
   subroutine gaussian_elimination(A,b,N)
@@ -99,7 +99,7 @@ contains
     real :: factor
 
     ! gaussian elimination
-    do j = 1, (N-1)           ! j is column
+    do j = 1, N-1           ! j is column
        do i = j+1, N       ! i is row
           factor = A(i,j)/A(1,1)
           A(i,:) = A(i,:) - factor*A(j,:)
@@ -112,7 +112,7 @@ end subroutine gaussian_elimination
 !----------------------------------------!
 ! Back Substitution
 ! A is the matrix
-! b is vedtor to augment with
+! b is vector to augment with
 ! N is the rank
 !----------------------------------------!
 subroutine backsubstitution(A,b,N)
@@ -137,7 +137,32 @@ subroutine backsubstitution(A,b,N)
   end do
 end subroutine backsubstitution
 
+subroutine decomposeL(A,N)
+  real, allocatable, dimension(:,:), intent(INOUT) :: A
+  integer, intent (in) :: N
+  integer :: i,j
+  real :: factor
+  do j = 1, N
+      do i = j+1,N
+           factor = -A(i,j)/A(j,j)
+           A(i,j) = factor
+      enddo
+  enddo
+  !print*, "inside decomposeA"
+end subroutine decomposeL
 
+subroutine decomposeU(A,N)
+  real, allocatable, dimension(:,:), intent(INOUT) :: A
+  integer, intent (in) :: N
+  integer :: i,j
+  real :: factor
+   do j = N, (N-1), -1            ! j is column
+     do i = j-1, 1, -1        ! i is column
+        factor = -A(i,j)/A(j,j)
+        A(j,i) = factor
+     end do
+  end do
+end subroutine decomposeU
 end module set_up
 
 
@@ -147,10 +172,10 @@ program read_data
 
   !dynamic array and vector, size determined at runtime
   real, dimension (:,:), allocatable :: A
-  real, dimension (:), allocatable :: row, b
+  real, dimension (:), allocatable :: row, b,row2
 
   !integer variables to hold rank
-  integer :: i,j, rank1, rank2, n, m ,o, A_size
+  integer :: i,j, rank1, rank2, n, m ,o, A_size,A_size2
 
   !Open the dat file 
   open (2, file = "A_1.dat")
@@ -217,7 +242,34 @@ program read_data
   call printAugmented(A,b,rank1)
   print *, " "
 
+  deallocate(A) 
+  print *, "Gaussian elimination without Partial Pivoting .."
+  open (4, file = "A_1.dat")
+  read(4,*) rank1
+  print*, rank1
+  call initMatrix (rank1,A)
+   !make a vector for each row of A
+  A_size2 = (rank1 * rank1)
+  call initVector (rank1,row2)
 
+
+  !Read the rest of the file line by line
+  !Each line is a row of A
+  !Set each row of A
+  !print each row for debugging
+  do i=1, rank1
+    read (4, *) row2
+    A(i,:) = row2
+  end do
+
+  call printMatrix(A,rank1)
+  print*, 
+
+  call decomposeL(A,rank1)
+  call printMatrix(A,rank1) 
+  print*, 
+  call decomposeU(A,rank1)
+  call printMatrix(A,rank1)
   !deallocate memory for array and matrix
   deallocate (row)
   deallocate (A)
