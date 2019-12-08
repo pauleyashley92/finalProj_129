@@ -139,28 +139,30 @@ subroutine backsubstitution(A,b,N)
   end do
 end subroutine backsubstitution
 
-subroutine decomposeL(A,N)
+subroutine decomposeL()
   real, allocatable, dimension(:,:), intent(INOUT) :: A
   integer, intent (in) :: N
-  integer :: i,j
+  integer :: i,j, k
   real :: factor
   do j = 1, N
       do i = j+1,N
            factor = -A(i,j)/A(j,j)
            A(i,j) = factor
       enddo
-  enddo
+  enddo   
+    
   !print*, "inside decomposeA"
 end subroutine decomposeL
 
-subroutine decomposeU(A,N)
+subroutine decomposeU(Col,A,N)
   real, allocatable, dimension(:,:), intent(INOUT) :: A
+  real, allocatable, dimension(:), intent(in) :: Col
   integer, intent (in) :: N
   integer :: i,j
   real :: factor
    do j = N, (N-1), -1            ! j is column
      do i = j-1, 1, -1        ! i is column
-        factor = -A(i,j)/A(j,j)
+        factor = -
         A(j,i) = factor
      end do
   end do
@@ -265,11 +267,11 @@ program read_data
   end do
 
   call printMatrix(A,rank1)
-  print*, 
+  print*, ""
 
   call decomposeL(A,rank1)
   call printMatrix(A,rank1) 
-  print*, 
+  print*, ""
   call decomposeU(A,rank1)
   call printMatrix(A,rank1)
   !deallocate memory for array and matrix
