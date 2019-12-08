@@ -32,44 +32,58 @@ contains
   return
   end subroutine initVector
 
+  !----------------------------------------!
+  ! Print Matrix
+  ! M is the matrix
+  ! N is the rank
+  !----------------------------------------!
+  subroutine printMatrix(M, N)
+
+    integer, intent (in) :: N
+    real, dimension (:,:), allocatable, intent (in) :: M
+    integer :: i
+    do i=1, N
+      print *,  M(i,:) 
+    end do
+
+  end subroutine printMatrix
+
+  !----------------------------------------!
+  ! Print Vector
+  ! V is the vector
+  ! N is the size
+  !----------------------------------------!
+  subroutine printVector(V, N)
+
+    integer, intent (in) :: N
+    real, dimension (:), allocatable, intent (in) :: V
+    integer :: i
+    do i=1, N
+      print *,  V(i) 
+    end do
+
+  end subroutine printVector
+
+  !----------------------------------------!
+  ! Print Augmented Matrix
+  ! A is the matrix
+  ! b is vedtor to augment with
+  ! N is the rank
+  !----------------------------------------!
+  subroutine printAugmented(A, b, N)
+
+    real, dimension (:,:), allocatable, intent (in) :: A
+    real, dimension (:), allocatable, intent (in) :: B
+    integer, intent (in) :: N
+    integer :: i
+    do i = 1, N           ! i is row
+      print *, A(i,:), "|", b(i)
+    end do
+
+  end subroutine printAugmented
+
+
 end module set_up
-
-
-subroutine printMatrix1(n, m)
-
-implicit none
-  integer, intent(in) :: n,m
-  real, dimension(n,m) :: array
-  integer :: i
-  open (15, file = "A_1.dat")
-  read(15,*)
-  read(15,*) array 
-  do i = 1,n
-     print *, array(i,:)
-  end do
-  close(15)
-  
-end subroutine printMatrix1
-
-subroutine printMatrix2(n)
-
-implicit none
-   integer, intent(in) :: n
-   real, dimension(n) :: array
-   integer :: i
-   open (16, file = "B_1.dat")
-   read(16,*)
-   read(16,*) array
-   do i =1,n
-       print *, array(i)
-   enddo
-   close (16)
-end subroutine printMatrix2
-
-function gaussianElim(A,b)
-end function gaussianElim 
-
-
 
 
 program read_data
@@ -77,7 +91,7 @@ program read_data
   implicit none
 
   !dynamic array and vector, size determined at runtime
-  real, dimension (:,:), allocatable :: array, A
+  real, dimension (:,:), allocatable :: A
   real, dimension (:), allocatable :: row, b
 
   !integer variables to hold rank
@@ -103,7 +117,6 @@ program read_data
   A_size = (rank1 * rank1)
   call initVector (rank1,row)
 
-  print *, "Fill A .."
 
   !Read the rest of the file line by line
   !Each line is a row of A
@@ -111,14 +124,10 @@ program read_data
   !print each row for debugging
   do i=1, rank1
     read (2, *) row
-    print *,  row
     A(i,:) = row
   end do
 
-
   !populate Vector
-
-  print *, "Fill b .."
 
   !Read the rest of the file line by line
   !Each line is entry in b
@@ -126,14 +135,7 @@ program read_data
   !print each entry for debugging
   do i=1, rank2
     read (3, *) n
-    print *,  n
     b(i) = n
-  end do
-
-  print *, "Augmented matrix .."
-
-  do i = 1, rank1           ! i is row
-    print *, A(i,:), "|", b(i)
   end do
 
   !close the files 
@@ -141,6 +143,13 @@ program read_data
   close(3)
   
   !Print the matrix and vector to stdout
+  print *, " ", "Matrix A .."
+  call printMatrix(A, rank1)
+  print *, " ", "Vector b .."
+  call printVector(b, rank2)
+  print *, " ", "Augmented A with b.."
+  call printAugmented(A, b, rank1)
+  print *, " "
 
   !deallocate memory for array and matrix
   deallocate (row)
