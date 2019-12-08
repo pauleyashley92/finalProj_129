@@ -18,6 +18,20 @@ contains
   return
   end subroutine initMatrix
 
+  !----------------------------------------!
+  ! Set create vector of length N
+  ! N is the input
+  ! N sized vector is the return value
+  !----------------------------------------!
+  subroutine initVector ( N, V )
+    integer, intent (in) :: N
+    real, dimension (:), allocatable, intent (out) :: V
+
+    allocate ( V(N) )
+
+  return
+  end subroutine initVector
+
 end module set_up
 
 
@@ -63,6 +77,7 @@ program read_data
   implicit none
   !allocatable array, size determined at runtime
   real, dimension (:,:), allocatable :: array
+  real, dimension (:), allocatable :: vector
   integer :: i,j, rank1, rank2
 
   !Open the dat file
@@ -82,6 +97,7 @@ program read_data
 
 
   call initMatrix (rank1,array)
+  call initVector (rank2,vector)
 
   deallocate (array)  
   stop
