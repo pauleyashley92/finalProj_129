@@ -303,31 +303,21 @@ subroutine decomp(A,b,N,M)
     call initMatrix(N,ID)
     call initMatrix(N,C)
 
-    do j = 1, N          ! j is column
-      ID(j,:) = 0
+    do j = 1, N         ! j is column
+      C(j,:) = 0        ! Set C to all zeros
+      ID(j,:) = 0       ! Identity Matix zeros
+      ID(j,j) = 1       ! Identity matrix diagonal
     end do
-
-    do j = 1, N          ! j is column
-      ID(j,j) = 1
-    end do
-
-    print *, "Matrix ID: "
-    call printMatrix(ID,N)
 
     do j = 1, N-1         ! j is column
       M = ID
       do i = j+1, N
-        M(i,j) = A(i,j)/A(j,j)
+        M(i,j) = - A(i,j)/A(j,j)
       end do
       print *, "Matrix M"
       call printMatrix(M,N)
-      
-      !multiply Mj*A
-      do i = 1, N
-        do k = 1, N
-          C(i,k)=DOT_PRODUCT(M(i,1:N), A(1:N,k))
-        end do
-      end do
+
+      C = matmul(M, A)
       A = C
       print *, "Matrix A"
       call printMatrix(A,N)
