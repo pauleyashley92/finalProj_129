@@ -328,13 +328,13 @@ end subroutine decomp
 ! Backsubstitution
 !----------------------------------------!
 subroutine backsub(U,X,Y,N)
-    real, allocatable, dimension(:,:), intent(inout) :: U,Y
-    real, allocatable, dimension(:), intent(inout) :: X
+    real, allocatable, dimension(:,:), intent(inout) :: U
+    real, allocatable, dimension(:), intent(inout) :: X,Y
     integer, intent (in) :: N
-    integer :: i,k 
+    integer :: i,k
     real :: sum
 
-    !X(N) = Y(N)/U(N,N)
+    X(N) = Y(N)/U(N,N)
 
     do i = N-1, 1, -1        ! j is column
       if (U(i,i) == 0) then
@@ -342,18 +342,12 @@ subroutine backsub(U,X,Y,N)
       end if
       sum = 0.0
       do k = (i + 1), N
-        sum = sum + U(i,k)*X(k)
+        sum = (sum + U(i,k)*X(k))
       end do
-      X(i) = (Y(i) - sum)/U(i,i)
+      X(i) = (Y(i)- sum)/U(i,i)
     end do
    
 end subroutine backsub
-
-
-
-
-
- 
 
 end module set_up
 
@@ -367,7 +361,7 @@ program read_data
 
   !dynamic array and vector, size determined at runtime
   real, dimension (:,:), allocatable :: A , A_copy, Ma
-  real, dimension (:), allocatable :: row, b,row2, B_copy, X
+  real, dimension (:), allocatable :: row, b,row2, b_copy, X
 
   !integer variables to hold rank
   integer :: i,j, rank1, rank2, n, m ,o, A_size,A_size2
@@ -450,10 +444,10 @@ program read_data
   call printVector(b_copy,rank1) 
   print *, " "
 
+  !U
   call initVector(rank1, X)
   print *, "Back Substitution .."
-  !(U,X,Y,N)
-  call backsub(Ma,X,b_copy,N)
+  call backsub(Ma,X,b_copy, N)
   call printVector(X,rank1)
   print *, " "
 
