@@ -121,7 +121,7 @@ contains
       end if
       do i = j+1, N
          factor = A(i,j)/A(j,j)
-         A(i,:) = A(i,:) - factor*A(j,:)
+         A(i,:) = A(i,:) - factor*A(i,:)
          b(i) = b(i) - factor*b(j)
       end do
     end do
@@ -232,13 +232,16 @@ subroutine decomposeL(A,N)
            factor = -A(i,j)/A(j,j)
            A(i,j) = factor
       enddo
+      call printMatrix(A,N)
+      print*, ""
   enddo
-  
-  !equivalence(A,B)
+ 
   call setVals(A,N)
   call printMatrix(A,N)
+  print *, ""
+  call printMatrix(B,N)
   print*, " "  
-  call printMatrix(B,N)   
+ ! call printMatrix(A,N)   
  ! call matMult(A,B)  
   !print*, "inside decomposeA"
 end subroutine decomposeL
