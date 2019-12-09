@@ -97,28 +97,34 @@ contains
     real, allocatable, dimension(:) :: Col
     integer, intent (in) :: N
     integer :: i,j, Max
-    real :: factor
+    real :: factor, temp
 
     allocate ( Col(N) )
 
     do j=1, (N-1)
+      print *,"Aug Matrix A .."
+      call printAugmented(A,b,N)
+      print *, " "
       Col = A(:,j)
-      call findMaxInColumn(Col,N,Max)
+      call findMaxInColumn(Col,j,N,Max)
       if (Max /= j) then
           !interchange row K and j
-          !print *, " ", "Matrix A .."
-          !call printMatrix(A, N)
-          !print *, "Swap the rows so max is on top.."
-          !print *, " "
+          print *, "Swap the rows so max is on top.."
           
           Col = A(j, :)
           A(j, :) = A(Max, :)
           A(Max, :) = Col
 
-          !print *, " ", "Matrix A .."
-          !call printMatrix(A, N)
+          temp = b(j)
+          b(j) = b(Max)
+          b(Max) = temp
 
+          print *,"Aug Matrix A .."
+          call printAugmented(A,b,N)
       end if
+      if ( A(j,j) == 0 )then
+        stop
+      endif
       do i = j+1, N
          factor = A(i,j)/A(j,j)
          A(i,:) = A(i,:) - factor*A(j,:)
@@ -160,9 +166,9 @@ end subroutine stdgaussian_elimination
 ! return the index of the row with the 
 ! largest absolute value
 !----------------------------------------!
-subroutine findMaxInColumn(Col,N,Max)
+subroutine findMaxInColumn(Col,index,N,Max)
   real, allocatable, dimension(:), intent(in) :: Col
-  integer, intent (in) :: N
+  integer, intent (in) :: N, index
   integer, intent(out) :: Max
   integer :: i
 
@@ -170,19 +176,20 @@ subroutine findMaxInColumn(Col,N,Max)
   !print *, Col
   !print *, " "
   
-  Max = 1
-  do i=2, N
-    !print *, "Looking at element: ", Col(i)
-    !print *, " "
-    if( abs(Col(i)) > Max ) then
+  Max = index
+  do i=(index+1), N
+    print *, "Looking at element: ", Col(i)
+    print *, " "
+    if( abs(Col(i)) > abs(Col(Max)) ) then
       !print *, "Element was larger than max."
       !print *, " "
       Max = i
+      print *, "Max in column: ", Col(i) , "At index: ", Max
+      print *, " "
     end if
   end do
-  !print *, "Max in column: ", Max
-  !print *, " "
 
+  return
 end subroutine findMaxInColumn
 
 !----------------------------------------!
@@ -309,14 +316,17 @@ program read_data
   !Do Gaussian Elimination
   print *, "Gaussian elimination with Partial Pivoting.."
   call gaussian_elimination(A,b, rank1)
+  print *, " "
+  print *, "After.."
   call printAugmented(A, b, rank1)
+  print *, " "
 
   !Do Back Substitution
-  !print *, "Back Substitution .."
-  !call backsubstitution(A,b,rank1)
+  print *, "Back Substitution .."
+  call backsubstitution(A,b,rank1)
 
-  !call printAugmented(A,b,rank1)
-  !print *, " "
+  call printAugmented(A,b,rank1)
+  print *, " "
 
   deallocate(A) 
   print *, "Gaussian elimination without Partial Pivoting .."
