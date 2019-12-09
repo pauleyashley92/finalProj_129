@@ -294,13 +294,14 @@ end subroutine setVals
 !----------------------------------------!
 subroutine decomp(A,b,N,M)
     real, allocatable, dimension(:,:), intent(inout) :: A, M
-    real, allocatable, dimension(:,:) :: ID
+    real, allocatable, dimension(:,:) :: ID, C
     real, allocatable, dimension(:), intent(inout) :: b
     integer, intent (in) :: N
-    integer :: i,j
+    integer :: i,j,k, l
     real :: factor
 
     call initMatrix(N,ID)
+    call initMatrix(N,C)
 
     do j = 1, N          ! j is column
       ID(j,:) = 0
@@ -316,16 +317,18 @@ subroutine decomp(A,b,N,M)
     do j = 1, N-1         ! j is column
       M = ID
       do i = j+1, N
-        !print *, "column j: ", j
-        !print *, "row i: ", i
-        !print *, " "
-        !print *, A(i,j), "/", A(j,j)
-        !print *, " "
         M(i,j) = A(i,j)/A(j,j)
       end do
       print *, "Matrix M"
       call printMatrix(M,N)
-      A = MATMUL(M, A)
+      
+      !multiply Mj*A
+      do i = 1, N
+        do k = 1, N
+          C(i,k)=DOT_PRODUCT(M(i,1:N), A(1:N,k))
+        end do
+      end do
+      A = C
       print *, "Matrix A"
       call printMatrix(A,N)
       print *, "_____________________________"
@@ -334,9 +337,10 @@ subroutine decomp(A,b,N,M)
 
     !print *, "Matrix A: "
     !call printMatrix(A,N)
-
    
 end subroutine decomp
+
+
  
 
 end module set_up
