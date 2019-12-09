@@ -324,6 +324,34 @@ subroutine decomp(A,b,N,M)
    
 end subroutine decomp
 
+!----------------------------------------!
+! Backsubstitution
+!----------------------------------------!
+subroutine backsub(U,X,Y,N)
+    real, allocatable, dimension(:,:), intent(inout) :: U,Y
+    real, allocatable, dimension(:), intent(inout) :: X
+    integer, intent (in) :: N
+    integer :: i,k 
+    real :: sum
+
+    !X(N) = Y(N)/U(N,N)
+
+    do i = N-1, 1, -1        ! j is column
+      if (U(i,i) == 0) then
+        stop
+      end if
+      sum = 0.0
+      do k = (i + 1), N
+        sum = sum + U(i,k)*X(k)
+      end do
+      X(i) = (Y(i) - sum)/U(i,i)
+    end do
+   
+end subroutine backsub
+
+
+
+
 
  
 
@@ -339,7 +367,7 @@ program read_data
 
   !dynamic array and vector, size determined at runtime
   real, dimension (:,:), allocatable :: A , A_copy, Ma
-  real, dimension (:), allocatable :: row, b,row2, B_copy
+  real, dimension (:), allocatable :: row, b,row2, B_copy, X
 
   !integer variables to hold rank
   integer :: i,j, rank1, rank2, n, m ,o, A_size,A_size2
@@ -411,6 +439,8 @@ program read_data
   call printAugmented(A,b,rank1)
   print *, " "
 
+  !-----------------------------! Part 2 LU decomp
+
   call initMatrix (rank1, Ma)
   call decomp(A_copy,b_copy,rank1,Ma)
   print *, "U: "
@@ -418,6 +448,13 @@ program read_data
   print *, " "
   print *, "b: "
   call printVector(b_copy,rank1) 
+  print *, " "
+
+  call initVector(rank1, X)
+  print *, "Back Substitution .."
+  !(U,X,Y,N)
+  call backsub(Ma,X,b_copy,N)
+  call printVector(X,rank1)
   print *, " "
 
   !deallocate memory for arrays and matrices
