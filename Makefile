@@ -1,6 +1,6 @@
 # /codes/multifile/Makefile5
 
-OBJECTS = write_to_screen.o ge_elim.o read_data.o backward_solve.o linear_solve.o
+OBJECTS = read_data.o write_to_screen.o ge_elim.o backward_solve.o linear_solve.o 
 FLAGS = -Wall -Wextra -fdefault-real-8 -fdefault-double-8
 .PHONY: clean
 
@@ -14,4 +14,4 @@ main.exe: $(OBJECTS)
 	gfortran -c $(FLAGS) $< 
 
 clean:
-	rm -f $(OBJECTS) main.exe
+	rm -f $(OBJECTS) main.exe *.mod
