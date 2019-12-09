@@ -127,7 +127,7 @@ contains
       endif
       do i = j+1, N
          factor = A(i,j)/A(j,j)
-         A(i,:) = A(i,:) - factor*A(i,:)
+         A(i,:) = A(i,:) - factor*A(j,:)
          b(i) = b(i) - factor*b(j)
       end do
     end do
@@ -284,6 +284,11 @@ subroutine setVals(A,N)
 end subroutine setVals
  
 end module set_up
+
+
+!-----------------------------!
+! Main
+!-----------------------------!
 program read_data
   use set_up
   implicit none
@@ -350,20 +355,22 @@ program read_data
 
   !Do Gaussian Elimination
   print *, "Gaussian elimination with Partial Pivoting.."
-  call gaussian_elimination(A,b, rank1)
+  call gaussian_elimination(A,b,rank1)
   print *, " "
   print *, "After.."
   call printAugmented(A, b, rank1)
   print *, " "
 
   !Do Back Substitution
-  print *, "Back Substitution .."
-  call backsubstitution(A,b,rank1)
+  !print *, "Back Substitution .."
+  !call backsubstitution(A,b,rank1)
 
   call printAugmented(A,b,rank1)
   print *, " "
 
   deallocate(A) 
+
+  !! START OF KEVIN'S SECTION
   print *, "Gaussian elimination without Partial Pivoting .."
   open (4, file = "A_1.dat")
   read(4,*) rank1
@@ -384,19 +391,16 @@ program read_data
   end do
 
   call printMatrix(A,rank1)
-!<<<<<<< HEAD
   print*, ""
 
   call decomposeL(A,rank1)
  ! call printMatrix(A,rank1) 
   print*, ""
-!=======
   print*, " "
 
  ! call decomposeL(A,rank1)
  ! call printMatrix(A,rank1) 
  ! print*, " "
-!>>>>>>> bd05c88d0b6fe0f3eec8e395323e25b89e9c6117
 !  call decomposeU(A,rank1)
 !  call printMatrix(A,rank1)
   !deallocate memory for array and matrix
