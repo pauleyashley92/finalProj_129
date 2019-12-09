@@ -86,7 +86,7 @@ contains
   end subroutine printAugmented
 
   !----------------------------------------!
-  ! Gaussian Elimination
+  ! Gaussian Elimination with Pivoting
   ! A is the matrix
   ! b is vector to augment with
   ! N is the rank
@@ -94,22 +94,96 @@ contains
   subroutine gaussian_elimination(A,b,N)
     real, allocatable, dimension(:,:), intent(INOUT) :: A
     real, allocatable, dimension(:), intent(INOUT) :: b
+    real, allocatable, dimension(:) :: Col
     integer, intent (in) :: N
-    integer :: i,j
+    integer :: i,j, Max
     real :: factor
 
-    ! gaussian elimination
-    do j = 1, N-1           ! j is column
-       do i = j+1, N       ! i is row
-    !do j = 1, N           ! j is column
-    !   do i = 1, N       ! i is row
-          factor = A(i,j)/A(1,1)
-          A(i,:) = A(i,:) - factor*A(j,:)
-          b(i) = b(i) - factor*b(j)
-       end do
+    allocate ( Col(N) )
+
+    do j=1, (N-1)
+      Col = A(:,j)
+      call findMaxInColumn(Col,N,Max)
+      if (Max /= j) then
+          !interchange row K and j
+          !print *, " ", "Matrix A .."
+          !call printMatrix(A, N)
+          !print *, "Swap the rows so max is on top.."
+          !print *, " "
+          
+          Col = A(j, :)
+          A(j, :) = A(Max, :)
+          A(Max, :) = Col
+
+          !print *, " ", "Matrix A .."
+          !call printMatrix(A, N)
+
+      end if
+      do i = j+1, N
+         factor = A(i,j)/A(j,j)
+         A(i,:) = A(i,:) - factor*A(j,:)
+         b(i) = b(i) - factor*b(j)
+      end do
     end do
+
+    deallocate( Col )
+
 end subroutine gaussian_elimination
 
+!----------------------------------------!
+  ! Standard Gaussian Elimination 
+  ! A is the matrix
+  ! b is vector to augment with
+  ! N is the rank
+  !----------------------------------------!
+  subroutine stdgaussian_elimination(A,b,N)
+    real, allocatable, dimension(:,:), intent(INOUT) :: A
+    real, allocatable, dimension(:), intent(INOUT) :: b
+    real, allocatable, dimension(:) :: Col
+    integer, intent (in) :: N
+    integer :: i,j, Max
+    real :: factor
+
+    do j=1, (N-1)
+      do i = j+1, N
+         factor = A(i,j)/A(j,j)
+         A(i,:) = A(i,:) - factor*A(j,:)
+         b(i) = b(i) - factor*b(j)
+      end do
+    end do
+
+end subroutine stdgaussian_elimination
+
+!----------------------------------------!
+! Find Max Column 
+! looks through the column of A
+! return the index of the row with the 
+! largest absolute value
+!----------------------------------------!
+subroutine findMaxInColumn(Col,N,Max)
+  real, allocatable, dimension(:), intent(in) :: Col
+  integer, intent (in) :: N
+  integer, intent(out) :: Max
+  integer :: i
+
+  !print *, "Column.. "
+  !print *, Col
+  !print *, " "
+  
+  Max = 1
+  do i=2, N
+    !print *, "Looking at element: ", Col(i)
+    !print *, " "
+    if( abs(Col(i)) > Max ) then
+      !print *, "Element was larger than max."
+      !print *, " "
+      Max = i
+    end if
+  end do
+  !print *, "Max in column: ", Max
+  !print *, " "
+
+end subroutine findMaxInColumn
 
 !----------------------------------------!
 ! Back Substitution
@@ -139,37 +213,67 @@ subroutine backsubstitution(A,b,N)
   end do
 end subroutine backsubstitution
 
-subroutine decomposeL()
+subroutine decomposeL(A,N)
   real, allocatable, dimension(:,:), intent(INOUT) :: A
-  integer, intent (in) :: N
+  real, allocatable, dimension(:,:) :: B
+  integer, intent (INOUT) :: N
   integer :: i,j, k
   real :: factor
+  allocate(B(N,N))
+  !Copy an array B with contents of A
+  do j =1, N
+     do i =1, N
+       B(i,j) = A(i,j)
+     enddo
+  enddo
+  !Do the Matrix multiplication
   do j = 1, N
       do i = j+1,N
            factor = -A(i,j)/A(j,j)
            A(i,j) = factor
       enddo
-  enddo   
-    
+  enddo
+  
+  !equivalence(A,B)
+  call setVals(A,N)
+  call printMatrix(A,N)
+  print*, " "  
+  call printMatrix(B,N)   
+ ! call matMult(A,B)  
   !print*, "inside decomposeA"
 end subroutine decomposeL
-
-subroutine decomposeU(Col,A,N)
+!----------------------------!
+!subroutine decomposeU(A,N)
+!  real, allocatable, dimension(:,:), intent(INOUT) :: A
+!  real, allocatable, dimension(:), intent(in) :: Col
+!  integer, intent (in) :: N
+!  integer :: i,j
+!  real :: factor
+!   do j = N, (N-1), -1            ! j is column
+!     do i = j-1, 1, -1        ! i is column
+!        factor = -A(i,j)/A(j,j)
+!        A(i,j) = factor
+!        A(j,i) = factor
+!     end do
+!  end do
+!end subroutine decomposeU 
+!-----------------------------!
+subroutine setVals(A,N)
   real, allocatable, dimension(:,:), intent(INOUT) :: A
-  real, allocatable, dimension(:), intent(in) :: Col
-  integer, intent (in) :: N
-  integer :: i,j
-  real :: factor
-   do j = N, (N-1), -1            ! j is column
-     do i = j-1, 1, -1        ! i is column
-        factor = -
-        A(j,i) = factor
-     end do
+  integer, intent (INOUT) :: N
+  integer :: i, j
+  j = 1
+  do i=1, N
+    A(i,i) = 1
+    j = j+1
+    if (j>i) then
+      A(i,j) = 0
+      A(1,j) = 0
+    endif
   end do
-end subroutine decomposeU
+end subroutine setVals
+ 
 end module set_up
-
-
 program read_data
   use set_up
   implicit none
@@ -235,22 +339,22 @@ program read_data
   call printAugmented(A, b, rank1)
 
   !Do Gaussian Elimination
-  print *, "Gaussian elimination .."
+  print *, "Gaussian elimination with Partial Pivoting.."
   call gaussian_elimination(A,b, rank1)
   call printAugmented(A, b, rank1)
 
   !Do Back Substitution
-  print *, "Back Substitution .."
-  call backsubstitution(A,b,rank1)
+  !print *, "Back Substitution .."
+  !call backsubstitution(A,b,rank1)
 
-  call printAugmented(A,b,rank1)
-  print *, " "
+  !call printAugmented(A,b,rank1)
+  !print *, " "
 
   deallocate(A) 
   print *, "Gaussian elimination without Partial Pivoting .."
   open (4, file = "A_1.dat")
   read(4,*) rank1
-  print*, rank1
+  !print*, rank1
   call initMatrix (rank1,A)
    !make a vector for each row of A
   A_size2 = (rank1 * rank1)
@@ -267,13 +371,21 @@ program read_data
   end do
 
   call printMatrix(A,rank1)
+!<<<<<<< HEAD
   print*, ""
 
   call decomposeL(A,rank1)
-  call printMatrix(A,rank1) 
+ ! call printMatrix(A,rank1) 
   print*, ""
-  call decomposeU(A,rank1)
-  call printMatrix(A,rank1)
+!=======
+  print*, " "
+
+ ! call decomposeL(A,rank1)
+ ! call printMatrix(A,rank1) 
+ ! print*, " "
+!>>>>>>> bd05c88d0b6fe0f3eec8e395323e25b89e9c6117
+!  call decomposeU(A,rank1)
+!  call printMatrix(A,rank1)
   !deallocate memory for array and matrix
   deallocate (row)
   deallocate (A)
