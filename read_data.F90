@@ -102,14 +102,14 @@ contains
     allocate ( Col(N) )
 
     do j=1, (N-1)
-      print *,"Aug Matrix A .."
-      call printAugmented(A,b,N)
+      !print *,"Elim loop: ", j, " "
+      !call printAugmented(A,b,N)
       print *, " "
-      Col = A(:,j)
+      !Col = A(:,j)
       call findMaxInColumn(Col,j,N,Max)
       if (Max /= j) then
           !interchange row K and j
-          print *, "Swap the rows so max is on top.."
+          !print *, "Swap the rows so max is on top.."
           
           Col = A(j, :)
           A(j, :) = A(Max, :)
@@ -119,12 +119,12 @@ contains
           b(j) = b(Max)
           b(Max) = temp
 
-          print *,"Aug Matrix A .."
-          call printAugmented(A,b,N)
+          !print *,"Aug Matrix A .."
+          !call printAugmented(A,b,N)
       end if
-      if ( A(j,j) == 0 )then
+      if ( A(j,j) == 0 ) then
         stop
-      endif
+      end if
       do i = j+1, N
          factor = A(i,j)/A(j,j)
          A(i,:) = A(i,:) - factor*A(j,:)
@@ -143,19 +143,19 @@ end subroutine gaussian_elimination
   ! N is the rank
   !----------------------------------------!
   subroutine stdgaussian_elimination(A,b,N)
-    real, allocatable, dimension(:,:), intent(INOUT) :: A
-    real, allocatable, dimension(:), intent(INOUT) :: b
-    real, allocatable, dimension(:) :: Col
+    real, allocatable, dimension(:,:), intent(inout) :: A
+    real, allocatable, dimension(:), intent(inout) :: b
     integer, intent (in) :: N
-    integer :: i,j, Max
+    integer :: i,j
     real :: factor
 
-    do j=1, (N-1)
-      do i = j+1, N
-         factor = A(i,j)/A(j,j)
-         A(i,:) = A(i,:) - factor*A(j,:)
-         b(i) = b(i) - factor*b(j)
-      end do
+    ! gaussian elimination
+    do j = 1, N-1           ! j is column
+       do i = j+1, N        ! i is row
+          factor = A(i,j)/A(j,j)
+          A(i,:) = A(i,:) - factor*A(j,:)
+          b(i) = b(i) - factor*b(j)
+       end do
     end do
 
 end subroutine stdgaussian_elimination
@@ -166,6 +166,7 @@ end subroutine stdgaussian_elimination
 ! return the index of the row with the 
 ! largest absolute value
 !----------------------------------------!
+
 subroutine findMaxInColumn(Col,index,N,Max)
   real, allocatable, dimension(:), intent(in) :: Col
   integer, intent (in) :: N, index
@@ -178,14 +179,14 @@ subroutine findMaxInColumn(Col,index,N,Max)
   
   Max = index
   do i=(index+1), N
-    print *, "Looking at element: ", Col(i)
-    print *, " "
+    !print *, "Looking at element: ", Col(i)
+    !print *, " "
     if( abs(Col(i)) > abs(Col(Max)) ) then
       !print *, "Element was larger than max."
       !print *, " "
       Max = i
-      print *, "Max in column: ", Col(i) , "At index: ", Max
-      print *, " "
+      !print *, "Max in column: ", Col(i) , "At index: ", Max
+      !print *, " "
     end if
   end do
 
@@ -203,11 +204,11 @@ subroutine backsubstitution(A,b,N)
   real, allocatable, dimension(:), intent(INOUT) :: b
   integer, intent (in) :: N
   integer :: i,j
-  real :: factor
+  real :: factor, s
 
-  ! doing back substitution
+  !doing back substitution
   do j = N, (N-1), -1            ! j is column
-     do i = j-1, 1, -1        ! i is column
+     do i = j-1, 1, -1        ! i is row
         factor = A(i,j)/A(j,j)
         A(i,:) = A(i,:) - factor*A(j,:)
         b(i) = b(i) - factor*b(j)
@@ -217,7 +218,9 @@ subroutine backsubstitution(A,b,N)
   ! overwrite the solution vector to b
   do i = 1, N
      b(i) = b(i)/A(i,i)
+     A(i,i) = A(i,i)/A(i,i)
   end do
+
 end subroutine backsubstitution
 
 subroutine decomposeL(A,N)
@@ -345,11 +348,7 @@ program read_data
   close(2)
   close(3)
   
-  !Print the matrix and vector to stdout
-  print *, " ", "Matrix A .."
-  call printMatrix(A, rank1)
-  print *, " ", "Vector b .."
-  call printVector(b, rank2)
+
   print *, " ", "Augmented A with b.."
   call printAugmented(A, b, rank1)
 
@@ -357,14 +356,12 @@ program read_data
   print *, "Gaussian elimination with Partial Pivoting.."
   call gaussian_elimination(A,b,rank1)
   print *, " "
-  print *, "After.."
   call printAugmented(A, b, rank1)
   print *, " "
 
   !Do Back Substitution
-  !print *, "Back Substitution .."
-  !call backsubstitution(A,b,rank1)
-
+  print *, "Back Substitution .."
+  call backsubstitution(A,b,rank1)
   call printAugmented(A,b,rank1)
   print *, " "
 
