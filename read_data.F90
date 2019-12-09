@@ -127,7 +127,7 @@ contains
       endif
       do i = j+1, N
          factor = A(i,j)/A(j,j)
-         A(i,:) = A(i,:) - factor*A(j,:)
+         A(i,:) = A(i,:) - factor*A(i,:)
          b(i) = b(i) - factor*b(j)
       end do
     end do
@@ -222,33 +222,68 @@ end subroutine backsubstitution
 
 subroutine decomposeL(A,N)
   real, allocatable, dimension(:,:), intent(INOUT) :: A
-  integer, intent (in) :: N
-  integer :: i,j
+  real, allocatable, dimension(:,:) :: B
+  integer, intent (INOUT) :: N
+  integer :: i,j, k
   real :: factor
+  allocate(B(N,N))
+  !Copy an array B with contents of A
+  do j =1, N
+     do i =1, N
+       B(i,j) = A(i,j)
+     enddo
+  enddo
+  !Do the Matrix multiplication
   do j = 1, N
       do i = j+1,N
            factor = -A(i,j)/A(j,j)
            A(i,j) = factor
       enddo
+      call printMatrix(A,N)
+      print*, ""
   enddo
+ 
+  call setVals(A,N)
+  call printMatrix(A,N)
+  print *, ""
+  call printMatrix(B,N)
+  print*, " "  
+ ! call printMatrix(A,N)   
+ ! call matMult(A,B)  
   !print*, "inside decomposeA"
 end subroutine decomposeL
-
-subroutine decomposeU(A,N)
+!----------------------------!
+!subroutine decomposeU(A,N)
+!  real, allocatable, dimension(:,:), intent(INOUT) :: A
+!  real, allocatable, dimension(:), intent(in) :: Col
+!  integer, intent (in) :: N
+!  integer :: i,j
+!  real :: factor
+!   do j = N, (N-1), -1            ! j is column
+!     do i = j-1, 1, -1        ! i is column
+!        factor = -A(i,j)/A(j,j)
+!        A(i,j) = factor
+!        A(j,i) = factor
+!     end do
+!  end do
+!end subroutine decomposeU 
+!-----------------------------!
+subroutine setVals(A,N)
   real, allocatable, dimension(:,:), intent(INOUT) :: A
-  integer, intent (in) :: N
-  integer :: i,j
-  real :: factor
-   do j = N, (N-1), -1            ! j is column
-     do i = j-1, 1, -1        ! i is column
-        factor = -A(i,j)/A(j,j)
-        A(j,i) = factor
-     end do
+  integer, intent (INOUT) :: N
+  integer :: i, j
+  j = 1
+  do i=1, N
+    A(i,i) = 1
+    j = j+1
+    if (j>i) then
+      A(i,j) = 0
+      A(1,j) = 0
+    endif
   end do
-end subroutine decomposeU
+end subroutine setVals
+ 
 end module set_up
-
-
 program read_data
   use set_up
   implicit none
@@ -332,7 +367,7 @@ program read_data
   print *, "Gaussian elimination without Partial Pivoting .."
   open (4, file = "A_1.dat")
   read(4,*) rank1
-  print*, rank1
+  !print*, rank1
   call initMatrix (rank1,A)
    !make a vector for each row of A
   A_size2 = (rank1 * rank1)
@@ -349,13 +384,21 @@ program read_data
   end do
 
   call printMatrix(A,rank1)
-  print*, " "
+!<<<<<<< HEAD
+  print*, ""
 
   call decomposeL(A,rank1)
-  call printMatrix(A,rank1) 
+ ! call printMatrix(A,rank1) 
+  print*, ""
+!=======
   print*, " "
-  call decomposeU(A,rank1)
-  call printMatrix(A,rank1)
+
+ ! call decomposeL(A,rank1)
+ ! call printMatrix(A,rank1) 
+ ! print*, " "
+!>>>>>>> bd05c88d0b6fe0f3eec8e395323e25b89e9c6117
+!  call decomposeU(A,rank1)
+!  call printMatrix(A,rank1)
   !deallocate memory for array and matrix
   deallocate (row)
   deallocate (A)
