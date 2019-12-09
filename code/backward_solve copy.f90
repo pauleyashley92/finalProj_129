@@ -1,4 +1,6 @@
-!backward_solve
+! backward_solve.f90
+! Final Project for AM129 , Fall 2019
+! Written by Ashley Pauley and Kevin Lo
 
 module backward_solve
 	contains	
@@ -13,7 +15,23 @@ module backward_solve
 	      integer :: i,k
 	      real :: sum
 
+	      !print*,"printing U"
+	      !print*,U(1,:)
+	      !print*,U(2,:)
+	      !print*,U(3,:)
+	      !print*,U(4,:)
+
+	      !print*,"+++++++++++++++++++"
+	      !print*,"printing y"
+	      !print*,y(:)
+	      !print*,"+++++++++++++++++++"	      
+
+
+	      !print*,N
 	      X(N) = Y(N)/U(N,N)
+	      !print*, X(N), Y(N)
+
+	      !stop
 
 	      do i = N-1, 1, -1        ! j is column
 	        if (U(i,i) == 0) then

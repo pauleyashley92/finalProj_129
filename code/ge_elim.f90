@@ -1,4 +1,6 @@
 !ge_elim.f90
+! Final Project for AM129 , Fall 2019
+! Written by Ashley Pauley and Kevin Lo
 
 module ge_elim
 	contains 

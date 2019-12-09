@@ -14,4 +14,4 @@ main.exe: $(OBJECTS)
 	gfortran -c $(FLAGS) $< 
 
 clean:
-	rm -f $(OBJECTS) main.exe *.mod
+	rm -f $(OBJECTS) main.exe
