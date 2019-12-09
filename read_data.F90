@@ -285,7 +285,49 @@ subroutine setVals(A,N)
     endif
   end do
 end subroutine setVals
+
+!----------------------------------------!
+! Decomposition
+! A is the matrix
+! b is vector to augment with
+! N is the rank
+!----------------------------------------!
+subroutine decomp(A,b,N,M)
+    real, allocatable, dimension(:,:), intent(inout) :: A, M
+    real, allocatable, dimension(:), intent(inout) :: b
+    integer, intent (in) :: N
+    integer :: i,j
+    real :: factor
+
+    do j = 1, N          ! j is column
+      M(j,:) = 0
+    end do
+
+    print *, "Matrix M: "
+    call printMatrix(M,N)
+
+    do j = 1, N          ! j is column
+      M(j,j) = 1
+    end do
+
+    print *, "Matrix M: "
+    call printMatrix(M,N)
+
+    do j = 1, N-1         ! j is column
+      do i = j+1, N
+        print *, "column j: ", j
+        print *, "row i: ", i
+        print *, " "
+        M(i,j) = -A(i,j)/A(j,j)
+      end do
+    end do
+
+    print *, "Matrix M: "
+    call printMatrix(M,N)
+   
+end subroutine decomp
  
+
 end module set_up
 
 
@@ -297,8 +339,8 @@ program read_data
   implicit none
 
   !dynamic array and vector, size determined at runtime
-  real, dimension (:,:), allocatable :: A
-  real, dimension (:), allocatable :: row, b,row2
+  real, dimension (:,:), allocatable :: A , A_copy, Ma
+  real, dimension (:), allocatable :: row, b,row2, B_copy
 
   !integer variables to hold rank
   integer :: i,j, rank1, rank2, n, m ,o, A_size,A_size2
@@ -313,7 +355,9 @@ program read_data
 
   !Build the A matrix and the b vector with the ranks
   call initMatrix (rank1,A)
+  call initMatrix (rank1,A_copy)
   call initVector (rank2,b)
+  call initVector (rank2,b_copy)
 
   !Use the remainder of the files to initalize the matrix and vector
  
@@ -348,6 +392,9 @@ program read_data
   close(2)
   close(3)
   
+  !Make copies for part 2
+  A_copy = A
+  b_copy = b
 
   print *, " ", "Augmented A with b.."
   call printAugmented(A, b, rank1)
@@ -365,45 +412,25 @@ program read_data
   call printAugmented(A,b,rank1)
   print *, " "
 
-  deallocate(A) 
+  
+  print *, "A Copy: "
+  call printMatrix(A_copy,rank1) 
+  print *, "b_copy: "
+  call printVector(b_copy,rank1) 
+  print *, " "
 
-  !! START OF KEVIN'S SECTION
-  print *, "Gaussian elimination without Partial Pivoting .."
-  open (4, file = "A_1.dat")
-  read(4,*) rank1
-  !print*, rank1
-  call initMatrix (rank1,A)
-   !make a vector for each row of A
-  A_size2 = (rank1 * rank1)
-  call initVector (rank1,row2)
+  call initMatrix (rank1, Ma)
+  call decomp(A_copy,b_copy,rank1,Ma)
+  !call printMatrix(A_copy,rank1) 
+  !print *, " "
 
-
-  !Read the rest of the file line by line
-  !Each line is a row of A
-  !Set each row of A
-  !print each row for debugging
-  do i=1, rank1
-    read (4, *) row2
-    A(i,:) = row2
-  end do
-
-  call printMatrix(A,rank1)
-  print*, ""
-
-  call decomposeL(A,rank1)
- ! call printMatrix(A,rank1) 
-  print*, ""
-  print*, " "
-
- ! call decomposeL(A,rank1)
- ! call printMatrix(A,rank1) 
- ! print*, " "
-!  call decomposeU(A,rank1)
-!  call printMatrix(A,rank1)
-  !deallocate memory for array and matrix
+  !deallocate memory for arrays and matrices
   deallocate (row)
   deallocate (A)
-  deallocate (b)   
+  deallocate (Ma)
+  deallocate (b)
+  deallocate (A_copy)
+  deallocate (b_copy)    
 
   stop
 end program read_data
