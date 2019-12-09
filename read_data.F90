@@ -287,7 +287,7 @@ subroutine setVals(A,N)
 end subroutine setVals
 
 !----------------------------------------!
-! Decomposition
+! L Decomposition
 ! A is the matrix
 ! b is vector to augment with
 ! N is the rank
@@ -296,12 +296,14 @@ subroutine decomp(A,b,N,M)
     real, allocatable, dimension(:,:), intent(inout) :: A, M
     real, allocatable, dimension(:,:) :: ID, C
     real, allocatable, dimension(:), intent(inout) :: b
+    real, allocatable, dimension(:):: b_temp
     integer, intent (in) :: N
     integer :: i,j,k, l
     real :: factor
 
     call initMatrix(N,ID)
     call initMatrix(N,C)
+    call initVector(N,b_temp)
 
     do j = 1, N         ! j is column
       C(j,:) = 0        ! Set C to all zeros
@@ -314,19 +316,11 @@ subroutine decomp(A,b,N,M)
       do i = j+1, N
         M(i,j) = - A(i,j)/A(j,j)
       end do
-      print *, "Matrix M"
-      call printMatrix(M,N)
-
       C = matmul(M, A)
+      b = matmul(M, b)
       A = C
-      print *, "Matrix A"
-      call printMatrix(A,N)
-      print *, "_____________________________"
-
     end do
-
-    !print *, "Matrix A: "
-    !call printMatrix(A,N)
+    M = A
    
 end subroutine decomp
 
@@ -417,17 +411,14 @@ program read_data
   call printAugmented(A,b,rank1)
   print *, " "
 
-  
-  print *, "A Copy: "
-  call printMatrix(A_copy,rank1) 
-  print *, "b_copy: "
-  call printVector(b_copy,rank1) 
-  print *, " "
-
   call initMatrix (rank1, Ma)
   call decomp(A_copy,b_copy,rank1,Ma)
-  !call printMatrix(A_copy,rank1) 
-  !print *, " "
+  print *, "U: "
+  call printMatrix(Ma,rank1) 
+  print *, " "
+  print *, "b: "
+  call printVector(b_copy,rank1) 
+  print *, " "
 
   !deallocate memory for arrays and matrices
   deallocate (row)
